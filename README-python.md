@@ -1,3 +1,5 @@
+<!-- template-version: 2026-03-19-v1 -->
+<!-- source: ~/python-organized/working-templates/README-python.md -->
 # <project name>
 
 <One or two sentences describing what the project does and the problem it solves.>

@@ -1,3 +1,5 @@
+<!-- template-version: 2026-03-19-v1 -->
+<!-- source: ~/python-organized/working-templates/ARCHITECTURE-template.md -->
 # Architecture — <project name>
 
 ## Overview

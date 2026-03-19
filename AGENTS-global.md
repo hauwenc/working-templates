@@ -1,3 +1,5 @@
+<!-- template-version: 2026-03-19-v2 -->
+<!-- source: ~/python-organized/working-templates/AGENTS-global.md -->
 # AGENTS.md — Global Engineering Defaults
 
 ## Scope and Precedence
@@ -68,6 +70,7 @@ Test behavior and externally visible contracts rather than implementation detail
 Keep tests deterministic and independent where practical.
 Add or update tests when behavior changes.
 Run the smallest meaningful verification available for the change.
+When running full verification (lint, format, typecheck, tests), spawn a subagent to run it. The subagent should return a short pass/fail summary per step, with failure details only if something failed. This keeps large tool output out of the main context.
 If verification is skipped or incomplete, say so clearly and explain why.
 
 ## Compatibility
