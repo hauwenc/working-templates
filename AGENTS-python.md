@@ -129,7 +129,7 @@ Use fixtures or helpers for repeatable setup where they improve clarity.
 Test contracts and externally visible behavior rather than implementation details.
 When adding a new module or feature, add unit tests covering its public API. New code without tests should be the exception, not the default.
 Add or update tests whenever behavior changes.
-If bug fixing, add or update a regression test when practical.
+If bug fixing, add a regression test that reproduces the bug before applying the fix.
 
 ## Project-Specific Consistency Rules
 
