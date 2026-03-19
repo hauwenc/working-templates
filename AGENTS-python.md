@@ -256,9 +256,26 @@ clean: ## Remove caches and build artifacts
 
 Replace `<source files or package>` with the actual source paths (e.g., `*.py`, `src/`).
 
+### .gitignore
+
+Create a `.gitignore` at the project root:
+
+```
+.venv/
+__pycache__/
+*.pyc
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+*.db
+```
+
+Never commit data files (databases, CSVs, logs, binary blobs, large media) unless explicitly instructed. If unsure whether a file is data or code, ask the user before staging it.
+
 ### Initialization Order
 
-1. Create `pyproject.toml` with project metadata, dependencies, and pytest config.
+1. `git init` and create `.gitignore`.
+2. Create `pyproject.toml` with project metadata, dependencies, and pytest config.
 3. Create `Makefile` with the checklist pipeline above.
 4. Create `tests/` directory structure with `conftest.py` and at least one smoke test.
 5. Run `make setup` to install dev tools.
