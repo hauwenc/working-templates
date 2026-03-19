@@ -50,12 +50,14 @@ project-root/
 ├── tests/                 # Test suite
 ├── pyproject.toml
 ├── Makefile
-└── AGENTS.md
+├── AGENTS.md
+├── CLAUDE.md              # Claude Code session instructions
+└── STATUS.md              # Progress tracking (auto-generated)
 ```
 
 Each module starts as a single `.py` file. Only convert to a folder (sub-package with `__init__.py`) when a single file becomes too large to navigate or has clearly separable internal concerns.
 
-Use absolute imports within the package (e.g., `from <package_name>.constants import DRIVES_ROOT`).
+Use relative imports within the package (e.g., `from .constants import DRIVES_ROOT`).
 Configure the package as installable in `pyproject.toml` so imports work correctly:
 
 ```toml
