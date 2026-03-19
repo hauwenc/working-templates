@@ -32,28 +32,42 @@ Key paths and docs:
 
 ## Project Layout
 
-Use flat `.py` files in the project root for small-to-medium projects (up to ~15 modules). Do not create a package with `src/` layout or top-level `__init__.py` unless the project clearly outgrows the flat layout.
+Use the `src/` package layout. All application code lives under `src/<package_name>/`.
 
 ```
 project-root/
-├── main_entry.py      # CLI entry point
-├── module_a.py        # Domain module (single file — default)
-├── module_b/          # Domain module (folder — only when too large for one file)
-│   ├── __init__.py
-│   ├── core.py
-│   └── helpers.py
-├── constants.py       # Shared config
-├── db.py              # Data layer
-├── tests/             # Test suite
+├── src/
+│   └── <package_name>/
+│       ├── __init__.py
+│       ├── __main__.py    # CLI entry point (python -m <package_name>)
+│       ├── constants.py   # Shared config
+│       ├── db.py          # Data layer
+│       ├── module_a.py    # Domain module (single file — default)
+│       └── module_b/      # Domain module (folder — only when too large for one file)
+│           ├── __init__.py
+│           ├── core.py
+│           └── helpers.py
+├── tests/                 # Test suite
 ├── pyproject.toml
 ├── Makefile
 └── AGENTS.md
 ```
 
-Each module starts as a single `.py` file. Only convert to a folder (package with `__init__.py`) when a single file becomes too large to navigate or has clearly separable internal concerns. The import path should stay the same either way (e.g., `from module_a import Foo` works for both).
+Each module starts as a single `.py` file. Only convert to a folder (sub-package with `__init__.py`) when a single file becomes too large to navigate or has clearly separable internal concerns.
 
-Use simple absolute imports between modules (e.g., `from constants import DRIVES_ROOT`).
-Only restructure into a top-level package when the module count exceeds ~15 or the project needs to be pip-installable as a library.
+Use absolute imports within the package (e.g., `from <package_name>.constants import DRIVES_ROOT`).
+Configure the package as installable in `pyproject.toml` so imports work correctly:
+
+```toml
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+```
+
+Install in editable mode during development: `pip install -e .`
 
 ## Working Rules
 
