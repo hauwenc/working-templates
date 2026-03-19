@@ -233,15 +233,16 @@ Replace `<source files or package>` with the actual source paths (e.g., `*.py`, 
 ### Initialization Order
 
 1. Create `pyproject.toml` with project metadata, dependencies, and pytest config.
-2. Create `Makefile` with the checklist pipeline above.
-3. Create `tests/` directory structure with `conftest.py` and at least one smoke test.
-4. Run `make setup` to install dev tools.
-5. Run `make check` to verify everything passes.
-6. Generate `ARCHITECTURE.md` and `README.md` from templates.
-7. Generate `AGENTS.md` from this template and fill in project-specific values.
+3. Create `Makefile` with the checklist pipeline above.
+4. Create `tests/` directory structure with `conftest.py` and at least one smoke test.
+5. Run `make setup` to install dev tools.
+6. Run `make check` to verify everything passes.
+7. Generate `ARCHITECTURE.md` and `README.md` from templates.
+8. Generate `AGENTS.md` from this template and fill in project-specific values.
 
 ## Notes for Agents
 
 Do not guess project commands if they are defined in `Makefile`, `pyproject.toml`, `justfile`, CI config, or repo docs. Read and use the repository's actual commands.
 If repository rules conflict with generic Python preferences, repository rules win.
 If a task requires changes across multiple files, present the full set of changes rather than partial updates.
+When pushing to a remote, use SSH URLs (`git@github.com:<user>/<repo>.git`), not HTTPS. If github.com is not in `~/.ssh/known_hosts`, add it with `ssh-keyscan github.com >> ~/.ssh/known_hosts 2>/dev/null`.
