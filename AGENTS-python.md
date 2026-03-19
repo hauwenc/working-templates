@@ -61,7 +61,7 @@ Configure the package as installable in `pyproject.toml` so imports work correct
 ```toml
 [build-system]
 requires = ["setuptools"]
-build-backend = "setuptools.backends._legacy:_Backend"
+build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["src"]
