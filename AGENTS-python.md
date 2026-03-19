@@ -130,9 +130,118 @@ If a change is breaking or user-visible, add a short migration note in the docum
 Remove dead code, deprecated flags, and outdated docs in the touched area as part of the same change set when practical.
 For schema or stored-data changes, include migration, integrity, rollback, and recovery considerations.
 
+## Project Initialization
+
+When setting up a new project, create all of the following before writing application code:
+
+### Documentation
+
+- Generate `README.md` from the template at `~/python-organized/working-templates/README-python.md`.
+- Generate `ARCHITECTURE.md` from the template at `~/python-organized/working-templates/ARCHITECTURE-template.md`.
+
+### Test Structure
+
+Create a `tests/` directory with proper separation:
+
+```
+tests/
+├── conftest.py          # Shared fixtures (e.g., temp dirs, DB connections, mock data)
+├── unit/                # Fast, isolated tests — no I/O, no external deps
+│   ├── __init__.py
+│   └── test_<module>.py # One test file per module (test_constants.py, test_db.py, etc.)
+└── integration/         # Tests that hit real resources (DB, filesystem, subprocesses)
+    ├── __init__.py
+    └── test_<workflow>.py
+```
+
+- `conftest.py`: shared fixtures such as in-memory DB connections, temp directories, sample data.
+- `unit/`: pure logic tests. Mock or stub external dependencies. Must run fast with no side effects.
+- `integration/`: tests that exercise real I/O — database writes, file operations, subprocess calls. May be slower.
+- Add at least one smoke test per module at initialization so the test pipeline has something to run.
+- Configure pytest in `pyproject.toml`:
+
+```toml
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "integration: tests that use real I/O (DB, filesystem, subprocesses)",
+]
+```
+
+### Checklist Pipeline (Makefile)
+
+Create a `Makefile` with these targets:
+
+```makefile
+.PHONY: help lint format format-check typecheck test check setup clean
+
+help: ## Show this help
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2}'
+
+lint: ## Run linter (ruff)
+	.venv/bin/ruff check .
+
+format: ## Run formatter (ruff)
+	.venv/bin/ruff format .
+
+format-check: ## Check formatting without changes
+	.venv/bin/ruff format --check .
+
+typecheck: ## Run type checker (mypy)
+	.venv/bin/mypy --ignore-missing-imports <source files or package>
+
+test: ## Run tests
+	.venv/bin/python -m pytest tests/ -v
+
+check: ## Run full checklist: lint + format-check + typecheck + test
+	@echo "═══════════════════════════════════════════════"
+	@echo "  Running checklist pipeline"
+	@echo "═══════════════════════════════════════════════"
+	@echo ""
+	@echo "── [1/4] Lint ──────────────────────────────────"
+	@.venv/bin/ruff check . && echo "  ✓ Lint passed" || (echo "  ✗ Lint FAILED" && exit 1)
+	@echo ""
+	@echo "── [2/4] Format ────────────────────────────────"
+	@.venv/bin/ruff format --check . && echo "  ✓ Format passed" || (echo "  ✗ Format FAILED" && exit 1)
+	@echo ""
+	@echo "── [3/4] Type check ────────────────────────────"
+	@.venv/bin/mypy --ignore-missing-imports <source files or package> && echo "  ✓ Type check passed" || (echo "  ✗ Type check FAILED" && exit 1)
+	@echo ""
+	@echo "── [4/4] Tests ─────────────────────────────────"
+	@if [ -d tests ] && [ "$$(find tests -name '*.py' | head -1)" ]; then \
+		.venv/bin/python -m pytest tests/ -v && echo "  ✓ Tests passed" || (echo "  ✗ Tests FAILED" && exit 1); \
+	else \
+		echo "  ⊘ No tests found (tests/ empty or missing)"; \
+	fi
+	@echo ""
+	@echo "═══════════════════════════════════════════════"
+	@echo "  ✓ Checklist complete"
+	@echo "═══════════════════════════════════════════════"
+
+setup: ## Install dev dependencies (ruff, mypy, pytest)
+	.venv/bin/pip install ruff mypy pytest
+
+clean: ## Remove caches and build artifacts
+	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
+	find . -type d -name .mypy_cache -exec rm -rf {} + 2>/dev/null || true
+	find . -type d -name .ruff_cache -exec rm -rf {} + 2>/dev/null || true
+	find . -type d -name .pytest_cache -exec rm -rf {} + 2>/dev/null || true
+```
+
+Replace `<source files or package>` with the actual source paths (e.g., `*.py`, `src/`).
+
+### Initialization Order
+
+1. Create `pyproject.toml` with project metadata, dependencies, and pytest config.
+2. Create `Makefile` with the checklist pipeline above.
+3. Create `tests/` directory structure with `conftest.py` and at least one smoke test.
+4. Run `make setup` to install dev tools.
+5. Run `make check` to verify everything passes.
+6. Generate `ARCHITECTURE.md` and `README.md` from templates.
+7. Generate `AGENTS.md` from this template and fill in project-specific values.
+
 ## Notes for Agents
 
 Do not guess project commands if they are defined in `Makefile`, `pyproject.toml`, `justfile`, CI config, or repo docs. Read and use the repository's actual commands.
 If repository rules conflict with generic Python preferences, repository rules win.
 If a task requires changes across multiple files, present the full set of changes rather than partial updates.
-When initializing a new project, generate `README.md` from the template at `~/python-organized/working-templates/README-python.md` and `ARCHITECTURE.md` from `~/python-organized/working-templates/ARCHITECTURE-template.md`.
