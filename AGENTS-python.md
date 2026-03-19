@@ -28,7 +28,7 @@ Key paths and docs:
 - Main package/app: `<path>`
 - Tests: `<path>`
 - Config: `<path>`
-- Documentation to keep updated: `<path>`
+- Documentation to keep updated: `README.md`, `ARCHITECTURE.md`
 
 ## Working Rules
 
@@ -123,7 +123,7 @@ Follow these architectural boundaries:
 
 ## Change Checklist
 
-After any code, config, or CLI behavior change, update the relevant documentation.
+After any code, config, or CLI behavior change, update the relevant documentation (`README.md`, `ARCHITECTURE.md`).
 Before finishing, run the lint, test, and type check commands defined in Project Context.
 Run full verification before merge when practical. If skipped, state why.
 If a change is breaking or user-visible, add a short migration note in the documentation.
@@ -135,3 +135,4 @@ For schema or stored-data changes, include migration, integrity, rollback, and r
 Do not guess project commands if they are defined in `Makefile`, `pyproject.toml`, `justfile`, CI config, or repo docs. Read and use the repository's actual commands.
 If repository rules conflict with generic Python preferences, repository rules win.
 If a task requires changes across multiple files, present the full set of changes rather than partial updates.
+When initializing a new project, generate `README.md` from the template at `~/python-organized/working-templates/README-python.md` and `ARCHITECTURE.md` from `~/python-organized/working-templates/ARCHITECTURE-template.md`.
