@@ -15,7 +15,7 @@ When in doubt, prefer the existing repository structure, conventions, and toolin
 ## Project Context
 
 Target Python version: `<python-version>`
-Package/environment manager: `<uv | poetry | pip-tools | pip | hatch | other>`
+Package/environment manager: `uv`
 
 Primary commands:
 - Lint: `<command>`
@@ -60,14 +60,14 @@ Configure the package as installable in `pyproject.toml` so imports work correct
 
 ```toml
 [build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.setuptools.packages.find]
-where = ["src"]
+[tool.hatch.build.targets.wheel]
+packages = ["src/<package_name>"]
 ```
 
-Install in editable mode during development: `pip install -e .`
+Install dependencies and sync: `uv sync`
 
 ## Working Rules
 
@@ -213,25 +213,25 @@ markers = [
 Create a `Makefile` with these targets:
 
 ```makefile
-.PHONY: help lint format format-check typecheck test check setup clean
+.PHONY: help lint format format-check typecheck test check sync clean
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2}'
 
 lint: ## Run linter (ruff)
-	.venv/bin/ruff check .
+	uv run ruff check .
 
 format: ## Run formatter (ruff)
-	.venv/bin/ruff format .
+	uv run ruff format .
 
 format-check: ## Check formatting without changes
-	.venv/bin/ruff format --check .
+	uv run ruff format --check .
 
 typecheck: ## Run type checker (mypy)
-	.venv/bin/mypy --ignore-missing-imports <source files or package>
+	uv run mypy --ignore-missing-imports src/
 
 test: ## Run tests
-	.venv/bin/python -m pytest tests/ -v
+	uv run pytest tests/ -v
 
 check: ## Run full checklist: lint + format-check + typecheck + test
 	@echo "═══════════════════════════════════════════════"
@@ -239,17 +239,17 @@ check: ## Run full checklist: lint + format-check + typecheck + test
 	@echo "═══════════════════════════════════════════════"
 	@echo ""
 	@echo "── [1/4] Lint ──────────────────────────────────"
-	@.venv/bin/ruff check . && echo "  ✓ Lint passed" || (echo "  ✗ Lint FAILED" && exit 1)
+	@uv run ruff check . && echo "  ✓ Lint passed" || (echo "  ✗ Lint FAILED" && exit 1)
 	@echo ""
 	@echo "── [2/4] Format ────────────────────────────────"
-	@.venv/bin/ruff format --check . && echo "  ✓ Format passed" || (echo "  ✗ Format FAILED" && exit 1)
+	@uv run ruff format --check . && echo "  ✓ Format passed" || (echo "  ✗ Format FAILED" && exit 1)
 	@echo ""
 	@echo "── [3/4] Type check ────────────────────────────"
-	@.venv/bin/mypy --ignore-missing-imports <source files or package> && echo "  ✓ Type check passed" || (echo "  ✗ Type check FAILED" && exit 1)
+	@uv run mypy --ignore-missing-imports src/ && echo "  ✓ Type check passed" || (echo "  ✗ Type check FAILED" && exit 1)
 	@echo ""
 	@echo "── [4/4] Tests ─────────────────────────────────"
 	@if [ -d tests ] && [ "$$(find tests -name '*.py' | head -1)" ]; then \
-		.venv/bin/python -m pytest tests/ -v && echo "  ✓ Tests passed" || (echo "  ✗ Tests FAILED" && exit 1); \
+		uv run pytest tests/ -v && echo "  ✓ Tests passed" || (echo "  ✗ Tests FAILED" && exit 1); \
 	else \
 		echo "  ⊘ No tests found (tests/ empty or missing)"; \
 	fi
@@ -258,8 +258,8 @@ check: ## Run full checklist: lint + format-check + typecheck + test
 	@echo "  ✓ Checklist complete"
 	@echo "═══════════════════════════════════════════════"
 
-setup: ## Install dev dependencies (ruff, mypy, pytest)
-	.venv/bin/pip install ruff mypy pytest
+sync: ## Install/sync all dependencies
+	uv sync
 
 clean: ## Remove caches and build artifacts
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
@@ -267,8 +267,6 @@ clean: ## Remove caches and build artifacts
 	find . -type d -name .ruff_cache -exec rm -rf {} + 2>/dev/null || true
 	find . -type d -name .pytest_cache -exec rm -rf {} + 2>/dev/null || true
 ```
-
-Replace `<source files or package>` with the actual source paths (e.g., `*.py`, `src/`).
 
 ### .gitignore
 
@@ -289,13 +287,14 @@ Never commit data files (databases, CSVs, logs, binary blobs, large media) unles
 ### Initialization Order
 
 1. `git init` and create `.gitignore`.
-2. Create `pyproject.toml` with project metadata, dependencies, and pytest config.
+2. `uv init` or create `pyproject.toml` with project metadata, dependencies, dev dependencies, and pytest config.
 3. Create `Makefile` with the checklist pipeline above.
-4. Create `tests/` directory structure with `conftest.py` and at least one smoke test.
-5. Run `make setup` to install dev tools.
-6. Run `make check` to verify everything passes.
-7. Generate `ARCHITECTURE.md` and `README.md` from templates.
-8. Generate `AGENTS.md` from this template and fill in project-specific values.
+4. Create `src/<package_name>/` with `__init__.py` and `__main__.py`.
+5. Create `tests/` directory structure with `conftest.py` and at least one smoke test.
+6. Run `uv sync` to install all dependencies.
+7. Run `make check` to verify everything passes.
+8. Generate `ARCHITECTURE.md` and `README.md` from templates.
+9. Generate `AGENTS.md` from this template and fill in project-specific values.
 
 ## Notes for Agents
 
