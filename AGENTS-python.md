@@ -127,6 +127,7 @@ Prefer dependency injection or explicit seams where practical.
 Prefer deterministic tests. Avoid time-based sleeps and unseeded randomness unless unavoidable.
 Use fixtures or helpers for repeatable setup where they improve clarity.
 Test contracts and externally visible behavior rather than implementation details.
+When adding a new module or feature, add unit tests covering its public API. New code without tests should be the exception, not the default.
 Add or update tests whenever behavior changes.
 If bug fixing, add or update a regression test when practical.
 
