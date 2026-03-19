@@ -5,17 +5,14 @@
 ## Requirements
 
 - Python `<version>`
-- <system dependency 1> (e.g., `ffmpeg`, `redis`, `postgresql`)
-- <system dependency 2>
+- [uv](https://docs.astral.sh/uv/) (package manager)
+- <system dependency> (e.g., `ffmpeg`, `redis`, `postgresql`) — if any
 
 ## Installation
 
 ```bash
 cd <project-dir>
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-# or: pip install <package1> <package2>
+uv sync
 ```
 
 ## Usage
@@ -38,21 +35,32 @@ pip install -r requirements.txt
 <example command with flags>
 ```
 
-### <Command or feature 3>
+## Development
 
 ```bash
-<example command>
+uv sync                # Install all dependencies
+make check             # Run lint + format + typecheck + tests
+make lint              # Lint only
+make format            # Format only
+make typecheck         # Type check only
+make test              # Tests only
 ```
 
 ## Project Structure
 
 ```
 <project-dir>/
-├── <entry_point>.py       # <role>
-├── <module>.py            # <role>
-├── <module>.py            # <role>
+├── src/
+│   └── <package_name>/
+│       ├── __init__.py    # <role>
+│       ├── __main__.py    # python -m <package_name>
+│       ├── <module>.py    # <role>
+│       └── <module>.py    # <role>
 ├── tests/                 # Test suite
-├── pyproject.toml         # Project config
+│   ├── unit/              # Unit tests
+│   └── integration/       # Integration tests
+├── pyproject.toml         # Project config & dependencies
+├── Makefile               # Dev commands
 └── ARCHITECTURE.md        # Detailed architecture docs
 ```
 
