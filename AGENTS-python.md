@@ -114,6 +114,17 @@ Avoid duplication, but do not extract abstractions prematurely.
 Add docstrings to public APIs and to non-obvious logic where they help future readers.
 Use the docstring style already established in the repository. If none exists, use `<Google | NumPy | reST>` consistently.
 
+## Constants vs Configuration
+
+Separate hardcoded constants from runtime configuration:
+
+- **Constants** (`constants.py`): Values that affect correctness or output identity. Changing them invalidates prior results (e.g., hash parameters, algorithm settings, schema versions). These are code, not config.
+- **Configuration** (config file or CLI args): Values users might tune per-environment without breaking correctness (e.g., paths, batch sizes, timeouts, exclusion patterns, thresholds). Use a TOML config file (e.g., `<package>.toml` or a `[tool.<package>]` section in `pyproject.toml`) and allow CLI overrides.
+
+**Rule of thumb:** If changing the value means you need to recompute everything, it's a constant. If you can change it between runs without invalidating results, it's config.
+
+Keep `constants.py` for true constants only. Do not put environment-specific paths, tuning knobs, or filter rules there — those belong in config.
+
 ## Paths, Files, and I/O
 
 Prefer `pathlib.Path` over `os.path` in new code unless the surrounding code uses a different convention.
