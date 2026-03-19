@@ -295,6 +295,44 @@ Never commit data files (databases, CSVs, logs, binary blobs, large media) unles
 7. Run `make check` to verify everything passes.
 8. Generate `ARCHITECTURE.md` and `README.md` from templates.
 9. Generate `AGENTS.md` from this template and fill in project-specific values.
+10. Generate `CLAUDE.md` from the template at `~/python-organized/working-templates/CLAUDE-template.md`.
+
+## Progress Tracking
+
+### Auto-load
+At the start of every session, read `STATUS.md` if it exists. Use it to understand what was done previously and what is in progress or pending.
+
+### Auto-save
+After completing any significant task (feature, bug fix, refactor, config change), update `STATUS.md` with:
+- What was completed
+- What is in progress or blocked
+- What is planned next
+
+### Manual save (`/save`)
+When the user runs `/save`, immediately write the current session's progress to `STATUS.md`.
+
+### STATUS.md format
+
+```markdown
+# Project Status
+
+## Last Updated
+<ISO date> by <agent or user>
+
+## Completed
+- <what was done, with brief context>
+
+## In Progress
+- <what is currently being worked on>
+
+## Blocked
+- <anything waiting on user input or external dependency>
+
+## Next
+- <what should be done next>
+```
+
+Keep `STATUS.md` concise — it is a handoff document, not a changelog. Remove completed items once they are no longer relevant context for the next session.
 
 ## Notes for Agents
 
