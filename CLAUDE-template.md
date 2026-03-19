@@ -1,4 +1,4 @@
-<!-- template-version: 2026-03-19-v3 -->
+<!-- template-version: 2026-03-19-v4 -->
 <!-- source: ~/python-organized/working-templates/CLAUDE-template.md -->
 # Claude Code — Project Instructions
 
@@ -24,6 +24,10 @@ Spawn a subagent to check template versions. The subagent should:
 - Return a short summary: either "all templates up to date" or a list of stale files with local vs template versions
 
 If any files are stale, warn the user before proceeding.
+
+# Claude Code settings
+When bootstrapping a new project, copy `~/python-organized/working-templates/config/settings.json` to `.claude/settings.json`.
+This provides a `UserPromptSubmit` hook that reminds the agent to read `STATUS.md` at session start.
 
 ## When modifying templates
 When you update a template in `~/python-organized/working-templates/`, you MUST bump its `template-version`.

@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'Remember: read STATUS.md before starting work.'"
+          }
+        ]
+      }
+    ]
+  }
+}
