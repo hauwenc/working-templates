@@ -10,6 +10,17 @@
           }
         ]
       }
+    ],
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash /home/max/.claude/notify.sh"
+          }
+        ]
+      }
     ]
   }
 }
