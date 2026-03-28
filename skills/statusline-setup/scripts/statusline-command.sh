@@ -42,6 +42,20 @@ rate_7d_raw=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage // e
 if [ -z "$rate_5h_raw" ]; then rate_5h="-"; else rate_5h=$(printf '%.0f' "$rate_5h_raw"); fi
 if [ -z "$rate_7d_raw" ]; then rate_7d="-"; else rate_7d=$(printf '%.0f' "$rate_7d_raw"); fi
 
+# Reset times
+rate_5h_resets=$(echo "$input" | jq -r '.rate_limits.five_hour.resets_at // empty')
+rate_7d_resets=$(echo "$input" | jq -r '.rate_limits.seven_day.resets_at // empty')
+if [ -n "$rate_5h_resets" ]; then
+  rate_5h_time=$(date -d @"$rate_5h_resets" '+%H:%M')
+else
+  rate_5h_time="-"
+fi
+if [ -n "$rate_7d_resets" ]; then
+  rate_7d_time=$(date -d @"$rate_7d_resets" '+%a %H:%M')
+else
+  rate_7d_time="-"
+fi
+
 # Color helper: green <50%, yellow 50-80%, red >80%
 color_pct() {
   local val="$1"
@@ -58,5 +72,5 @@ user_name="${USER:-${USERNAME:-$(whoami)}}"
 host_name="${HOSTNAME%%.*}"
 [ -z "$host_name" ] && host_name=$(hostname 2>/dev/null | cut -d. -f1)
 
-printf "\033[1;32m%s@%s\033[0m \033[0;34m[%s]\033[0m \033[0;37m[%s]\033[0m %b${ctx_color}[ctx:%s%%]\033[0m \033[0;36m[tok:%s]\033[0m ${rate_5h_color}[5h:%s%%]\033[0m ${rate_7d_color}[7d:%s%%]\033[0m \033[0;34m->\033[0m" \
-  "$user_name" "$host_name" "$time_str" "$display_cwd" "$git_branch" "$used_pct" "$total_tokens" "$rate_5h" "$rate_7d"
+printf "\033[1;32m%s@%s\033[0m \033[0;34m[%s]\033[0m \033[0;37m[%s]\033[0m %b${ctx_color}[ctx:%s%%]\033[0m \033[0;36m[tok:%s]\033[0m ${rate_5h_color}[5h:%s%% @%s]\033[0m ${rate_7d_color}[7d:%s%% @%s]\033[0m \033[0;34m->\033[0m" \
+  "$user_name" "$host_name" "$time_str" "$display_cwd" "$git_branch" "$used_pct" "$total_tokens" "$rate_5h" "$rate_5h_time" "$rate_7d" "$rate_7d_time"

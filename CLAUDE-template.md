@@ -1,9 +1,9 @@
-<!-- template-version: 2026-03-19-v4 -->
-<!-- source: ~/python-organized/working-templates/CLAUDE-template.md -->
+<!-- template-version: 2026-03-27-v1 -->
+<!-- source: ~/python/working-templates/CLAUDE-template.md -->
 # Claude Code — Project Instructions
 
-Read `AGENTS.md` for full project conventions and rules.
-Read `~/python-organized/working-templates/preferences.md` for user working style and preferences.
+@./AGENTS.md
+Read `~/python/working-templates/preferences.md` for user working style and preferences.
 At the start of every session, read `STATUS.md` to pick up context from previous sessions.
 
 # Worktree awareness
@@ -15,7 +15,7 @@ Read STATUS.md from the main tree, not the worktree copy.
 # Template sync
 Project files derived from templates carry two HTML comments at the top:
 - `<!-- template-version: YYYY-MM-DD-vN -->` — the version when this file was last synced
-- `<!-- source: ~/python-organized/working-templates/<template-file>.md -->` — the source template
+- `<!-- source: ~/python/working-templates/<template-file>.md -->` — the source template
 
 ## Enforcement (must run at session start)
 Spawn a subagent to check template versions. The subagent should:
@@ -26,10 +26,20 @@ Spawn a subagent to check template versions. The subagent should:
 If any files are stale, warn the user before proceeding.
 
 # Claude Code settings
-When bootstrapping a new project, copy `~/python-organized/working-templates/config/settings.json` to `.claude/settings.json`.
+When bootstrapping a new project, copy `~/python/working-templates/config/settings.json` to `.claude/settings.json`.
 This provides a `UserPromptSubmit` hook that reminds the agent to read `STATUS.md` at session start.
 
 ## When modifying templates
-When you update a template in `~/python-organized/working-templates/`, you MUST bump its `template-version`.
+When you update a template in `~/python/working-templates/`, you MUST bump its `template-version`.
 - Same day as the current version: increment vN (e.g., `2026-03-19-v1` → `2026-03-19-v2`)
 - Different day: reset to v1 with the new date (e.g., `2026-03-19-v3` → `2026-03-20-v1`)
+
+# Planning and status tracking
+When entering plan mode or designing an implementation approach, you MUST:
+1. Write the plan to `STATUS.md` under a `## Current Plan` section before starting work
+   - Include the goal, approach, key decisions, and open questions
+2. Update `STATUS.md` after each meaningful milestone (e.g., task completed, blocker hit, approach changed)
+   - Don't wait until the end — update as you go so the file always reflects current state
+3. When a plan changes mid-session, update the plan in `STATUS.md` with the new direction and why it changed
+
+This ensures continuity across sessions — if the conversation is interrupted or a new session starts, `STATUS.md` has everything needed to resume.
