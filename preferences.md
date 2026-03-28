@@ -26,6 +26,10 @@
 - Bug fixes must have regression tests
 - No `# type: ignore` without specific error code and justification
 
+## Memory
+- When saving or updating memories, also maintain a `MEMORY.md` in the project root
+- This gives visibility into memory state without digging into hidden directories
+
 ## Communication
 - Don't use gh auth — use SSH
 - Don't assume projects need git remotes

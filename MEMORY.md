@@ -1,0 +1,4 @@
+- [User profile](user_profile.md) — Max, Python template maintainer, concise communication style
+- [Commit scope preference](feedback_commit_scope.md) — prefers bundling related changes in one commit
+- [GitHub CLI setup](reference_github.md) — gh CLI installed and authenticated, SSH remote
+- [Memory visibility](feedback_memory_visibility.md) — also maintain MEMORY.md in project root when memories change
