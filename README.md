@@ -11,6 +11,7 @@ Project templates for bootstrapping Python repositories with consistent structur
 | `ARCHITECTURE-template.md` | Architecture documentation template |
 | `README-python.md` | README template |
 | `CLAUDE-template.md` | Claude Code session instructions (auto-loads AGENTS.md and STATUS.md) |
+| `WORKFLOW-template.md` | Development process — planning workflow, `/poc`, per-step adversarial review, plan/audit-trail docs, AI-first decision lens, git discipline, worktrees |
 | `commands/save.md` | `/save` slash command — saves session progress to STATUS.md |
 
 ## Setup on a new machine

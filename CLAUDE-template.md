@@ -1,9 +1,12 @@
-<!-- template-version: 2026-03-27-v1 -->
+<!-- template-version: 2026-06-24-v1 -->
 <!-- source: ~/python/working-templates/CLAUDE-template.md -->
 # Claude Code — Project Instructions
 
 @./AGENTS.md
 Read `~/python/working-templates/preferences.md` for user working style and preferences.
+Read `~/python/working-templates/WORKFLOW-template.md` for the development process — how
+work moves from idea to shipped change (planning workflow, `/poc`, per-step adversarial
+review, plan/audit-trail docs, AI-first decision lens, git discipline, worktrees).
 At the start of every session, read `STATUS.md` to pick up context from previous sessions.
 
 # Worktree awareness
