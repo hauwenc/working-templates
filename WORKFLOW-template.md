@@ -1,5 +1,5 @@
 <!-- template-version: 2026-06-24-v1 -->
-<!-- source: ~/python/working-templates/WORKFLOW-template.md -->
+<!-- source: /media/max/data/working-templates/WORKFLOW-template.md -->
 # Development Process
 
 The meta-level rules for *how* work moves from idea to shipped change:

@@ -1,10 +1,10 @@
 <!-- template-version: 2026-06-24-v1 -->
-<!-- source: ~/python/working-templates/CLAUDE-template.md -->
+<!-- source: /media/max/data/working-templates/CLAUDE-template.md -->
 # Claude Code — Project Instructions
 
 @./AGENTS.md
-Read `~/python/working-templates/preferences.md` for user working style and preferences.
-Read `~/python/working-templates/WORKFLOW-template.md` for the development process — how
+Read `/media/max/data/working-templates/preferences.md` for user working style and preferences.
+Read `/media/max/data/working-templates/WORKFLOW-template.md` for the development process — how
 work moves from idea to shipped change (planning workflow, `/poc`, per-step adversarial
 review, plan/audit-trail docs, AI-first decision lens, git discipline, worktrees).
 At the start of every session, read `STATUS.md` to pick up context from previous sessions.
@@ -18,7 +18,7 @@ Read STATUS.md from the main tree, not the worktree copy.
 # Template sync
 Project files derived from templates carry two HTML comments at the top:
 - `<!-- template-version: YYYY-MM-DD-vN -->` — the version when this file was last synced
-- `<!-- source: ~/python/working-templates/<template-file>.md -->` — the source template
+- `<!-- source: /media/max/data/working-templates/<template-file>.md -->` — the source template
 
 ## Enforcement (must run at session start)
 Spawn a subagent to check template versions. The subagent should:
@@ -29,11 +29,11 @@ Spawn a subagent to check template versions. The subagent should:
 If any files are stale, warn the user before proceeding.
 
 # Claude Code settings
-When bootstrapping a new project, copy `~/python/working-templates/config/settings.json` to `.claude/settings.json`.
+When bootstrapping a new project, copy `/media/max/data/working-templates/config/settings.json` to `.claude/settings.json`.
 This provides a `UserPromptSubmit` hook that reminds the agent to read `STATUS.md` at session start.
 
 ## When modifying templates
-When you update a template in `~/python/working-templates/`, you MUST bump its `template-version`.
+When you update a template in `/media/max/data/working-templates/`, you MUST bump its `template-version`.
 - Same day as the current version: increment vN (e.g., `2026-03-19-v1` → `2026-03-19-v2`)
 - Different day: reset to v1 with the new date (e.g., `2026-03-19-v3` → `2026-03-20-v1`)
 
