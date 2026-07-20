@@ -1,12 +1,13 @@
-<!-- template-version: 2026-06-24-v1 -->
+<!-- template-version: 2026-07-20-v1 -->
 <!-- source: /media/max/data/working-templates/CLAUDE-template.md -->
 # Claude Code — Project Instructions
 
 @./AGENTS.md
 Read `/media/max/data/working-templates/preferences.md` for user working style and preferences.
 Read `/media/max/data/working-templates/WORKFLOW-template.md` for the development process — how
-work moves from idea to shipped change (planning workflow, `/poc`, per-step adversarial
-review, plan/audit-trail docs, AI-first decision lens, git discipline, worktrees).
+work moves from idea to shipped change (coordinator + agent fleet, model routing, agent
+conduct, planning workflow, `/poc`, per-step adversarial review, plan/audit-trail docs,
+AI-first decision lens, UI browser verification, git discipline, worktrees).
 At the start of every session, read `STATUS.md` to pick up context from previous sessions.
 
 # Worktree awareness

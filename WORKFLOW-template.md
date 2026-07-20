@@ -1,4 +1,4 @@
-<!-- template-version: 2026-06-24-v1 -->
+<!-- template-version: 2026-07-20-v1 -->
 <!-- source: /media/max/data/working-templates/WORKFLOW-template.md -->
 # Development Process
 
@@ -18,20 +18,113 @@ status doc, an append-only backlog.
 | Situation | Workflow |
 |---|---|
 | Trivial, mechanical, reversible edit | Just do it — verify, then commit |
-| Non-trivial production change (feature, refactor, bug class) | **Planning workflow** (§2) |
-| Validating an idea quickly, often discarded or rewritten | **Fast POC workflow** (§3) |
+| Non-trivial production change (feature, refactor, bug class) | **Planning workflow** (§4), run as coordinator + agent fleet (§2) |
+| Validating an idea quickly, often discarded or rewritten | **Fast POC workflow** (§5) |
 
 A POC is **not** a shortcut for production work. If a POC proves out,
 stop and promote it to a full plan before hardening it.
 
-## 2. Planning workflow
+## 2. Execution model — coordinator + agent fleet
+
+**Default for any non-trivial, multi-step task** (a feature, a multi-file
+change, a research→implement effort, a review→fix sweep, a migration): the
+main session acts as a **coordinator / project manager**, not the hands-on
+implementer. It **delegates** reading, code-writing, command-running,
+research, and doc edits to subagents (the Agent tool for one-offs, the
+Workflow tool for fan-out/pipelines) and keeps for itself: decomposition,
+planning, orchestration, judgement calls, reviewing agent output,
+committing, and talking to the user. Read only enough (STATUS, the plan,
+agent reports) to orchestrate — delegate the heavy reading.
+
+**Do the work directly instead for:** conversational answers, a single
+trivial edit, a quick lookup, small policy/doc edits where the judgement
+*is* the work, or when the user says "just do it yourself." Don't spin up
+a fleet for a two-line fix. Scale the agent count to the task.
+
+**The pipeline** (adapt depth to size; each stage is delegated):
+
+1. **Understand** — fan out parallel read-only explorer agents over the
+   relevant surfaces → structured maps; synthesise.
+2. **Plan** — delegate the plan doc (§4); run a **multi-lens adversarial
+   plan review** (agents briefed to attack, not validate); fold
+   must-fixes; iterate. **Any plan touching UI templates, static JS/CSS,
+   or a user-facing flow MUST include a `ui-ux-critic` agent** (visual
+   consistency + interaction ergonomics + copy quality) before locking —
+   not just "design-heavy" work.
+3. **Implement, phase by phase** — a reusable **phase-runner** Workflow
+   per phase: *implement + tests → independent adversarial diff-review →
+   fold must-fixes → re-verify → append the plan's Implementation log*.
+   UI-touching phases add the `ui-ux-critic` agent to the diff-review,
+   briefed with rendered screenshots (§9). Phases that share files run
+   **sequentially** (avoid worktree conflicts); split a broad sweep into
+   batches so each diff + review stays reviewable. Commit each phase once
+   green + reviewed.
+4. **Close** — integration verification, STATUS/plan/BACKLOG updates.
+
+**Model routing for subagents** (the `model` opt on Agent / Workflow
+calls) — route by judgement density, not habit. Tier names current as of
+2026-07; adjust as the model lineup evolves:
+
+| Task shape | Model |
+|---|---|
+| Plan authoring, adversarial plan/diff review, UX critique, ambiguous judgement calls, design synthesis | `fable` |
+| Implementation, test-writing, multi-file mechanical edits, e2e runs | `opus` |
+| Pure mechanical sweeps — grep-and-summarize, format checks, bulk file reads | `sonnet` |
+
+Forcing `fable` everywhere burns quota for no gain; `opus` is the
+implementation workhorse, `fable` goes where the judgement is.
+
+**Non-negotiables (why the pattern exists):**
+
+- **Every code change is verified AND reviewed by an *independent*
+  adversarial agent** — never the implementer reviewing itself. This loop
+  routinely catches real defects the implementer's own green tests miss;
+  treat a clean self-report as unverified until the adversarial pass
+  confirms it.
+- **Subagent briefs carry the conduct contract** — every Agent / Workflow
+  stage prompt restates §3 plus the step's success criteria. A rule the
+  brief omits does not bind the subagent.
+- **Drive autonomously between checkpoints** ("go all the way unless you
+  need me"), but surface genuine product/design decisions to the user.
+- **Recover, don't restart** when a delegated workflow dies mid-run:
+  inspect the partial state + journal, finish the failed stage by hand
+  (verify → review → commit), don't blindly re-run.
+
+## 3. Agent conduct — four principles
+
+Binding for the coordinator AND every subagent (see the brief rule in §2):
+
+1. **Think before coding.** Surface assumptions and trade-offs explicitly.
+   When a requirement is ambiguous, present the competing interpretations —
+   don't silently pick one. Push back when a simpler approach exists. If
+   confused, stop and name what's unclear instead of guessing.
+2. **Simplicity first.** Minimum code that solves the problem. No
+   speculative features, abstractions for single-use code, unrequested
+   configurability, or error handling for impossible scenarios. If 200
+   lines could be 50, rewrite.
+3. **Surgical changes.** Every changed line traces to the request. Don't
+   "improve" adjacent code, comments, or formatting; match existing style.
+   Remove only the orphans YOUR change created (now-unused imports /
+   variables / functions); pre-existing dead code gets mentioned, never
+   deleted unasked.
+4. **Goal-driven execution.** Define verifiable success criteria before
+   starting ("write a failing test, make it pass" beats "fix the bug"),
+   state step → verify pairs for multi-step work, loop until verified, and
+   report the verification honestly.
+
+## 4. Planning workflow
+
+Execution shape follows §2 — "implement" throughout this section means
+*delegate to an implementer subagent/workflow*; the coordinator
+decomposes, reviews agent output, and commits.
 
 For any non-trivial implementation (`/plan`, `/feature`, `/task`, or a
 substantial change):
 
 1. **Write the plan to a file** — `docs/plans/plan-YYYY-MM-DD-<title-slug>.md`
-   (see §4 for naming) — and reference it from `STATUS.md`. Plans live
-   in the repo, not just in chat, so they survive across sessions.
+   (see §6 for naming) — and reference it from `STATUS.md`. Plans live
+   in the repo, not just in chat, so they survive across sessions. Set
+   the header **`Status: New`** (§6).
 2. **Present the plan and WAIT for review.** Do **not** start
    implementing.
 3. **Discuss and adjust** the plan based on feedback.
@@ -41,7 +134,8 @@ substantial change):
    remain or the design shifts substantially, **re-spawn the reviewer**.
    Iterate until either no must-fix issues remain or the residual risks
    are explicitly accepted in the plan.
-6. **Only then implement.**
+6. **Only then implement** — flip the plan header
+   **`Status: New → Working`** in the same turn you start.
 
 Do not exit plan mode and immediately start coding. Surface concerns at
 every stage.
@@ -50,7 +144,8 @@ every stage.
 
 For each phase/step of the plan:
 
-1. **Implement** the step.
+1. **Implement** the step (delegated to an implementer subagent — the
+   coordinator does not write the code itself).
 2. **Verify** — run the smallest meaningful check (targeted tests +
    focused re-run).
 3. **Spawn an adversarial agent** to review the diff against the plan:
@@ -69,9 +164,11 @@ is small next to a wrong cutover that has to be rolled back.
 **The plan stays the source of truth across the whole arc.** Any time
 the design shifts (a reviewer caught a defect, a decision changed a
 trade-off), update the plan in the *same turn*. If you're about to
-commit without an updated plan section, stop and update first.
+commit without an updated plan section, stop and update first. When the
+whole arc ships/merges, flip the plan header **`Status: Working → Done`**
+in that same turn.
 
-## 3. Fast POC workflow (`/poc`)
+## 5. Fast POC workflow (`/poc`)
 
 A faster pipeline for **proof-of-concept work** — validating an idea, not
 shipping production code. Use when the user invokes `/poc <description>`
@@ -96,7 +193,8 @@ or says "do this as a POC".
    Skip the adversarial *pre-review* of the plan — it's a record, not a
    gate.
 4. **Implement in one pass** — no per-step review, drive to a working
-   end-to-end shape.
+   end-to-end shape. Delegation per §2 still applies — an implementer
+   subagent does the code work for anything beyond a trivial diff.
 5. **Run the verification** named in the plan.
 6. **One adversarial review pass on the final diff.** Brief the reviewer:
    this is a POC — flag *real* defects only (happy-path correctness bugs,
@@ -120,7 +218,7 @@ two are the irreducible audit trail.
 as you go" / "stop at each step", switch to the standard workflow's
 interaction shape (still skipping the plan pre-review).
 
-## 4. Plan & document naming
+## 6. Plan & document naming
 
 - **Plans:** `docs/plans/plan-YYYY-MM-DD-<title-slug>.md`.
   `<title-slug>` is short kebab-case describing the work
@@ -130,10 +228,22 @@ interaction shape (still skipping the plan pre-review).
     name. Titles disambiguate naturally and stay stable.
   - Same-day plans are disambiguated by title; if two share a date *and*
     slug, append a qualifier (`-v2`, `-followup`), not a number.
+- **Every plan header carries a `Status:` line**, exactly one of:
+
+  | Status | Meaning |
+  |---|---|
+  | **New** | Drafted, not started — awaiting review / go-ahead. |
+  | **Working** | Implementation in progress (≥1 phase started). |
+  | **Done** | Shipped + merged; the plan's Implementation log is the archive. |
+
+  The executing agent keeps it current **in the same turn as the state
+  change**: `New` at creation, `New → Working` when implementation
+  begins, `Working → Done` when the work ships/merges. This is the single
+  status signal — don't invent per-plan variants (`DRAFT`/`IMPLEMENTED`/…).
 - **Benchmarks:** `docs/benchmark/performance-YYYY-MM-DD.md`.
 - Reference plan files from `STATUS.md` so the next session can find them.
 
-## 5. Audit-trail docs
+## 7. Audit-trail docs
 
 The institutional memory that lets the next session — or a future you —
 skip re-deriving what's already known. Keep these current *in the same
@@ -164,7 +274,7 @@ Conventions:
   that has no such surface, but adopt them the moment "we've broken our
   heads on this before" starts to recur.
 
-## 6. AI-first decision lens (LLM step vs deterministic code)
+## 8. AI-first decision lens (LLM step vs deterministic code)
 
 When a sub-problem is **open-world judgement** (input space unbounded,
 "the next case always looks different", correctness needs
@@ -215,7 +325,37 @@ cost: an LLM step costs money and seconds and is non-reproducible
 run-to-run — never put one in a hot loop or per-row path without a cost +
 latency budget. The test is **judgement and open-endedness, not novelty.**
 
-## 7. Git discipline
+## 9. UI changes — browser verification
+
+**Any change to UI templates, JS, or CSS MUST land with a browser-level
+e2e test (Playwright) that exercises the change in a real browser.**
+Server-side render checks (test-client + HTML grep) are necessary but NOT
+sufficient: they miss dialog behaviour, `prompt`/`confirm` flows,
+click-handler wiring, CSS visibility, DOM-scrape logic the JS relies on,
+and anything that only manifests in a real layout engine. Curl-level or
+test-client smoke is never the sole UI verification — treat it as the
+storage-layer check; the browser-side check is the contract.
+
+**Visual verification (REQUIRED, in addition to e2e):** before declaring
+a UI change done, drive the real app with Playwright, capture screenshots
+of every changed surface, and inspect them; pass the screenshot paths to
+the `ui-ux-critic` review brief (§2). E2e green is necessary, not
+sufficient — a passing suite can hide a visually broken layout.
+
+Conventions (adapt paths per project):
+
+- E2e tests live in their own dir (e.g. `tests/e2e/`), excluded from the
+  default unit-test run, invoked explicitly.
+- When asserting "X is gone from the page", prefer a zero-count locator
+  assertion over text-grep — it catches both removal and CSS-hide.
+- When a UI surface has a JS-only branch (e.g. a `confirm()` bypass →
+  re-POST with a flag), the e2e test must drive that branch
+  (`page.on('dialog', …)`) and assert the downstream state.
+- If a UI surface can't be reached from the e2e harness (e.g. it needs a
+  live API key), say so explicitly in the commit/PR — don't claim the UI
+  is verified by server-side checks alone.
+
+## 10. Git discipline
 
 Commit lineage is documentation. Someone reading `git log` months later
 should understand *why* each change exists without digging through diffs.
@@ -267,7 +407,7 @@ must explain *why*.
 - Skipping hooks (`--no-verify`) or signing — diagnose the underlying
   issue instead.
 
-## 8. Worktree discipline
+## 11. Worktree discipline
 
 When a session starts in a git worktree (path like
 `.claude/worktrees/<name>/`), **all file writes must target the worktree
