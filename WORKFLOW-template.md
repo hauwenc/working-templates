@@ -1,4 +1,4 @@
-<!-- template-version: 2026-07-20-v1 -->
+<!-- template-version: 2026-09-29-v1 -->
 <!-- source: /media/max/data/working-templates/WORKFLOW-template.md -->
 # Development Process
 
@@ -41,6 +41,41 @@ trivial edit, a quick lookup, small policy/doc edits where the judgement
 *is* the work, or when the user says "just do it yourself." Don't spin up
 a fleet for a two-line fix. Scale the agent count to the task.
 
+### Right-size the process
+
+Every subagent round-trip starts cold (re-reads the code) and the
+coordinator waits on it; stacking them serially is the main way a
+20-minute job becomes 90. A real case: a 2-line template fix + a ~100-line
+UI feature took 86 min through 8 serial agent hops (map → implement →
+review → implement → 2 reviews → fix round → re-review), where ~20–30 min
+would have kept the same quality. Rules:
+
+- **A fix whose exact change is already known** (from a map report, the
+  user, or a quick read) is §1's "trivial edit": the coordinator writes it
+  and its test directly. No implementer agent, no separate review — the
+  final review of the change set covers it.
+- **Small feature (≈ ≤150 lines, one surface)**: the coordinator may
+  implement it directly once it has the map. Delegate when the reading or
+  writing is genuinely heavy, not by reflex.
+- **Front-load foreseeable requirements into the brief.** Before
+  delegating a UI feature, spend a minute on the obvious UX failure modes
+  (feedback visible after a reload? message names the right thing? error
+  path? duplicates?) and put them in the brief. A reviewer's must-fix you
+  could have predicted costs a whole fix round plus its re-review.
+- **Tests while iterating: targeted only** — the touched test files, the
+  touched e2e file. Implementer briefs say so explicitly: no full suite,
+  no full e2e run, no per-fix "revert and re-run" proofs unless a fix is
+  subtle. The full check (`make check`) runs **once**, at the end, in
+  parallel with the final review — not in every agent.
+- **One review pass per change set**, combining code + UX lenses in one
+  reviewer for small UI changes (separate `ui-ux-critic` only for
+  design-heavy work). A small fix round after review (≈ ≤50 lines of
+  must-fix/nice-to-have folding) is verified by the coordinator reading
+  the delta + targeted tests — no second full review unless the fix
+  round changed design or touched something risky it didn't before.
+- **Irreducible:** one independent review and one full check before
+  commit. Cut everything else before cutting those.
+
 **The pipeline** (adapt depth to size; each stage is delegated):
 
 1. **Understand** — fan out parallel read-only explorer agents over the
@@ -54,8 +89,9 @@ a fleet for a two-line fix. Scale the agent count to the task.
 3. **Implement, phase by phase** — a reusable **phase-runner** Workflow
    per phase: *implement + tests → independent adversarial diff-review →
    fold must-fixes → re-verify → append the plan's Implementation log*.
-   UI-touching phases add the `ui-ux-critic` agent to the diff-review,
-   briefed with rendered screenshots (§9). Phases that share files run
+   UI-touching phases add the `ui-ux-critic` lens to the diff-review,
+   briefed with rendered screenshots (§9) — as one combined reviewer for
+   small changes (see "Right-size the process"). Phases that share files run
    **sequentially** (avoid worktree conflicts); split a broad sweep into
    batches so each diff + review stays reviewable. Commit each phase once
    green + reviewed.
@@ -76,8 +112,10 @@ implementation workhorse, `fable` goes where the judgement is.
 
 **Non-negotiables (why the pattern exists):**
 
-- **Every code change is verified AND reviewed by an *independent*
-  adversarial agent** — never the implementer reviewing itself. This loop
+- **Every change set is verified AND reviewed by an *independent*
+  adversarial agent** before commit — never the implementer reviewing
+  itself. (One review can cover a trivial fix bundled with the feature
+  it ships with; see "Right-size the process".) This loop
   routinely catches real defects the implementer's own green tests miss;
   treat a clean self-report as unverified until the adversarial pass
   confirms it.
@@ -144,10 +182,10 @@ every stage.
 
 For each phase/step of the plan:
 
-1. **Implement** the step (delegated to an implementer subagent — the
-   coordinator does not write the code itself).
+1. **Implement** the step (delegated to an implementer subagent, except
+   where "Right-size the process" in §2 says the coordinator writes it).
 2. **Verify** — run the smallest meaningful check (targeted tests +
-   focused re-run).
+   focused re-run); the full suite runs once, before commit.
 3. **Spawn an adversarial agent** to review the diff against the plan:
    *did this step do what the plan said? did it introduce new defects?*
    Pass it the changed files and the relevant plan section.
@@ -158,8 +196,11 @@ For each phase/step of the plan:
    verification result, the review's must-fixes that were incorporated.
 6. **Only then move to the next phase.**
 
-This applies even to "obvious" steps — the cost of one adversarial pass
-is small next to a wrong cutover that has to be rolled back.
+This applies even to "obvious" steps of a planned arc — the cost of one
+adversarial pass is small next to a wrong cutover that has to be rolled
+back. It does not mean one review per two-line fix: trivial edits ride
+along in the review of the change set they ship with (§2, "Right-size
+the process").
 
 **The plan stays the source of truth across the whole arc.** Any time
 the design shifts (a reviewer caught a defect, a decision changed a
